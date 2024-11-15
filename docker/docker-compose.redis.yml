@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+  redis:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.redis
+    image: caik/kotlin-locking-poc-redis:latest
+    networks:
+      - locking-poc-redis
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: America/Toronto
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: caik/kotlin-locking-poc-redis-app:latest
+    networks:
+      - locking-poc-redis
+    environment:
+      APP: redis
+      REDIS_HOST: redis
+      JVM_ARGS: '--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED'
+      TZ: America/Toronto
+    deploy:
+      replicas: 2
+
+networks:
+  locking-poc-redis: null

@@ -1,0 +1,35 @@
+version: '3.5'
+services:
+  database:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.database
+    image: caik/kotlin-locking-poc-database:latest
+    networks:
+      - locking-poc-database
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: locking-poc
+      MYSQL_USER: random-user
+      MYSQL_PASSWORD: random-pass
+      TZ: America/Toronto
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: caik/kotlin-locking-poc-database-app:latest
+    networks:
+      - locking-poc-database
+    environment:
+      APP: database
+      DATABASE_HOST: database
+      JVM_ARGS: '--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED'
+      TZ: America/Toronto
+    deploy:
+      replicas: 2
+
+networks:
+  locking-poc-database: null
